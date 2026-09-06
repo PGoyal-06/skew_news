@@ -5,10 +5,17 @@ import { runAnalysis } from "@/lib/pipeline/analyze";
 /**
  * `GET /api/cron/pipeline` — the automatic hourly pipeline (AGENTS §18).
  *
- * Vercel Cron fires this at :15 past the hour, 15 minutes after the Oxylabs
- * schedules run. Step one turns finished scheduled jobs into articles; step two
+ * Vercel Cron fires this at 06:15 UTC, 15 minutes after the Oxylabs schedules
+ * run at 06:00. Step one turns finished scheduled jobs into articles; step two
  * analyzes everything still pending. Step two runs even when step one fails —
  * there may be pre-existing unanalyzed articles (§18.6).
+ *
+ * Daily rather than hourly because Vercel Hobby crons cannot run more than once
+ * a day; see `SCHEDULER_LIMITS.cronExpression` for the Pro settings.
+ *
+ * Hobby cron timing is only accurate to the hour (±59 min), so the 15-minute
+ * gap is a floor, not a guarantee — any job Oxylabs has not finished is simply
+ * left unprocessed and picked up on the next run.
  *
  * GET is the one exception to §14's POST rule: Vercel Cron only sends GET.
  */
